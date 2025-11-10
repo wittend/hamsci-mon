@@ -1,0 +1,55 @@
+### What I built
+- Pure Deno project (no Node/Vite needed) with `Deno.serve` that:
+  - Serves the SPA statically with an SPA fallback to `index.html`.
+  - Exposes dev-only JSON APIs to read/write project files under `./projects` and object definitions under `./obj`. These write APIs are automatically disabled on Deno Deploy.
+- Client SPA implementing your initial milestone:
+  - Menubar (File/Edit/Tools/Help) placeholder.
+  - Toolbar with New, Open, Save, Save As + Light/Dark toggle (applies to all UI + canvas background).
+  - Status bar showing local lat/lon under cursor, local time, and UTC at cursor on the right.
+  - Left palette populated from `palette_objects.json` (with an example).
+  - D3-geo orthographic globe on `<canvas>` using TopoJSON world-atlas; graticule for major lat/lon, pan/zoom/rotate with mouse.
+  - Drag from palette to drop on globe; placed object stores lat, lon, elevation, and your metadata fields; hover tooltip shows full details.
+  - Projects: New/Open/Save/Save As. On local dev, saves to `./projects` via API. On Deploy/read-only, gracefully falls back to browser download/upload.
+  - Connectors: basic quadratic Bézier with arrowheads, serialized as `{ fromId, toId }` (rendering included; simple editor UI to create connectors can be added next).
+- Theming: clean default light/dark via CSS variables.
+- Licensing: GPL-3.0-or-later added.
+
+### Files added/changed
+- `deno.json`: tasks and config (dev, start, test, fmt, lint).
+- `server/main.ts`: static server + SPA fallback + dev-only file APIs.
+- `index.html`: new SPA shell (menubar, toolbar, palette, globe canvas + SVG overlay, status bar).
+- `public/app.css`: app styles + theming; retained your existing `public/style.css` for fonts/visuals.
+- `app.js`: client app with D3 globe, palette drag-drop, tooltip, project open/save logic.
+- `utils/time.js`: shared time/format helpers.
+- Example data: `palette_objects.json`, `obj/example-1_obj.json`.
+- `LICENSE`: GPL-3.0-or-later notice.
+
+### How to run locally
+1) Prereq: Deno 2.4+ installed.
+2) From project root:
+```
+deno task dev
+```
+3) Open http://localhost:8000
+- Drag “Example Node” from the palette onto the globe; hover it to see tooltips.
+- Use New/Open/Save/Save As on the toolbar.
+  - In dev: files go to `./projects/*_prj.json` via API.
+  - If APIs are unavailable, it will download/upload JSON in the browser.
+- Toggle Dark Mode on the right of the toolbar.
+
+### Deploy notes
+- Deploy to Deno Deploy by pointing to `server/main.ts` entry. Static SPA works; write APIs return 403. Save/Open will automatically fall back to browser download/upload.
+- For persistent cloud storage later, we can integrate Deno KV or R2; the UI is already structured to support an alternate backend.
+
+### Next steps I recommend
+- Add a simple connectors editor (click source object, then target) and context menu to remove/edit objects.
+- Add menu dropdowns and keyboard shortcuts.
+- Unit tests via `deno test` for utilities (already stubbed with `utils/time.js`) and geo helpers.
+- Optional: switch to three.js for performance experimentation (your architecture keeps this path open).
+- Optional: PWA packaging (manifest + service worker) to install as a standalone app.
+
+### Usage notes and guardrails
+- Project file names must end with `_prj.json` (per your spec). Dev API enforces this.
+- Object definition files end with `_obj.json`; example included.
+- To add more palette items, edit `palette_objects.json` and create corresponding files in `./obj`.
+- Existing Node/Vite artifacts are unused; you can remove `node_modules/*` if you want a clean Deno-only repo.

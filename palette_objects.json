@@ -1,0 +1,10 @@
+[
+  {
+    "guid": "example-1",
+    "hash": "sha256-0000000000000000000000000000000000000000000000000000000000000000",
+    "name": "Example Node",
+    "ordinal": 1,
+    "icon": "/javascript.svg",
+    "def": "/api/objects/example-1_obj.json"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "guid": "example-1",
+  "name": "Example Node",
+  "type": "sensor",
+  "owner": "demo",
+  "maidenhead": "FN20",
+  "elevation": 0,
+  "currentState": "idle",
+  "notes": "Example object for palette"
+}
