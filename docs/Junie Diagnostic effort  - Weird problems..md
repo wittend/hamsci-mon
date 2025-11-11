@@ -35,3 +35,14 @@ transfer-encoding: chunked
 date: Mon, 10 Nov 2025 22:11:42 GMT
 
 curl: (18) transfer closed with outstanding read data remaining
+
+dave@LP-Sig0:~/Projects/deno-dev/hamsci-mon$ curl --noproxy '*' -i http://127.0.0.1:8000/
+HTTP/1.1 200 OK
+content-type: application/octet-stream
+vary: Accept-Encoding
+transfer-encoding: chunked
+date: Mon, 10 Nov 2025 23:04:20 GMT
+
+curl: (18) transfer closed with outstanding read data remaining
+
+Listening on http://0.0.0.0:8000/ (http://localhost:8000/)

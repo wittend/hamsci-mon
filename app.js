@@ -1,5 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2025 hamsci-mon contributors
 // hamsci-mon client app
-// GPL-3.0-or-later
 
 // Using UMD globals (loaded by script tags in index.html) for full offline support
 // d3 available as window.d3; topojson.feature available as window.topojson.feature

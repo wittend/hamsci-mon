@@ -1,5 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2025 hamsci-mon contributors
 // Time utilities for hamsci-mon
-// GPL-3.0-or-later
 
 export function fmt2(n) { return n.toString().padStart(2, '0'); }
 

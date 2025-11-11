@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2025 hamsci-mon contributors
 // deno-lint-ignore-file no-explicit-any
 /**
  * Simple Deno.serve-based dev server for SPA + dev-only file persistence.

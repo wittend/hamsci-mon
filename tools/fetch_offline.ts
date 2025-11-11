@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2025 hamsci-mon contributors
 // Fetch and cache external assets locally for offline use.
 // Run: deno run -A tools/fetch_offline.ts
 // Or via task (see deno.json): deno task offline:fetch
