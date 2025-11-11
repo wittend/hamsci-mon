@@ -4,7 +4,8 @@
     "start": "deno run -A server/main.ts",
     "test": "deno test -A",
     "fmt": "deno fmt",
-    "lint": "deno lint"
+    "lint": "deno lint",
+    "offline:fetch": "deno run -A tools/fetch_offline.ts"
   },
   "lint": {
     "rules": {

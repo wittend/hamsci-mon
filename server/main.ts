@@ -7,7 +7,7 @@
  *   (disabled automatically on Deno Deploy)
  */
 
-import { extname, join, basename } from "https://deno.land/std@0.224.0/path/mod.ts";
+import { extname, join, basename, normalize } from "https://deno.land/std@0.224.0/path/mod.ts";
 import { contentType } from "https://deno.land/std@0.224.0/media_types/mod.ts";
 
 const isDeploy = !!Deno.env.get("DENO_DEPLOYMENT_ID");
@@ -44,14 +44,17 @@ function isApiRequest(url: URL) {
 }
 
 async function serveStatic(url: URL): Promise<Response> {
-  // Try exact path from root and public
+  // Normalize and prevent absolute path escape; only serve regular files
+  const requested = url.pathname.replace(/^\/+/, "");
   const tryPaths = [
-    join(root.pathname, url.pathname),
-    join(PUBLIC_DIR, url.pathname.replace(/^\/+/, "")),
+    join(root.pathname, requested),
+    join(PUBLIC_DIR, requested),
   ];
 
   for (const p of tryPaths) {
     try {
+      const stat = await Deno.stat(p);
+      if (!stat.isFile) continue; // skip directories and non-regular files
       const file = await Deno.open(p, { read: true });
       const type = contentType(extname(p)) ?? "application/octet-stream";
       return new Response(file.readable, { headers: { "content-type": type } });
@@ -60,7 +63,7 @@ async function serveStatic(url: URL): Promise<Response> {
     }
   }
 
-  // SPA fallback
+  // SPA fallback (also handles "/" and directory paths)
   try {
     const index = await Deno.open(join(root.pathname, "index.html"), { read: true });
     return new Response(index.readable, { headers: { "content-type": "text/html; charset=utf-8" } });
@@ -138,7 +141,7 @@ async function handleApi(req: Request, url: URL): Promise<Response> {
   return notFound();
 }
 
-Deno.serve({ port: 8000 }, (req) => {
+Deno.serve({ hostname: "127.0.0.1", port: 8000 }, (req) => {
   const url = new URL(req.url);
   if (isApiRequest(url)) {
     return handleApi(req, url).catch((e) => {

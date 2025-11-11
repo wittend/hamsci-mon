@@ -1,8 +1,8 @@
 // hamsci-mon client app
 // GPL-3.0-or-later
 
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-import { feature } from "https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js";
+import * as d3 from "/vendor/d3.esm.js";
+import { feature } from "/vendor/topojson-client.esm.js";
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
@@ -39,7 +39,13 @@ function setTheme(isDark) {
   draw();
 }
 
-$('#theme-toggle').addEventListener('change', (e) => setTheme(e.target.checked));
+const themeToggle = /** @type {HTMLInputElement} */($('#theme-toggle'));
+if (themeToggle) {
+  // Default to dark on first load
+  themeToggle.checked = true;
+  setTheme(true);
+  themeToggle.addEventListener('change', (e) => setTheme((e.target).checked));
+}
 
 // Menu items (placeholder dropdowns)
 $$('.menubar .menu-item').forEach(mi => mi.addEventListener('click', () => alert(`${mi.dataset.menu} menu (todo)`)));
@@ -274,18 +280,21 @@ function hitTest(pt) {
 }
 
 function drawGlobeBase() {
-  if (!worldData) return;
   ctx.clearRect(0,0,width,height);
-  ctx.fillStyle = dark ? '#0b2239' : '#cce5ff'; // ocean
+  // ocean
+  ctx.fillStyle = dark ? '#0b2239' : '#cce5ff';
   ctx.beginPath();
   geoPath({ type: 'Sphere' });
   ctx.fill();
 
+  // graticule
   ctx.strokeStyle = dark ? '#2a4a6a' : '#7fb2e6';
   ctx.lineWidth = 0.5;
   ctx.beginPath();
   geoPath(graticule);
   ctx.stroke();
+
+  if (!worldData) return; // if land/borders not loaded yet, leave base sphere
 
   // land
   ctx.fillStyle = dark ? '#2e3b2d' : '#d1dccc';
@@ -386,13 +395,34 @@ canvas.addEventListener('wheel', (e) => {
   draw();
 }, { passive: false });
 
+async function getJsonWithFallback(localUrl, remoteUrl) {
+  try {
+    const r = await fetch(localUrl);
+    if (r.ok) return r.json();
+  } catch (_) { /* ignore and try remote */ }
+  const rr = await fetch(remoteUrl);
+  if (!rr.ok) throw new Error(`${rr.status} ${rr.statusText} for ${remoteUrl}`);
+  return rr.json();
+}
+
 async function loadWorld() {
-  const landTopo = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json').then(r=>r.json());
-  const countriesTopo = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>r.json());
-  worldData = {
-    land: feature(landTopo, landTopo.objects.land),
-    countries: feature(countriesTopo, countriesTopo.objects.countries)
-  };
+  try {
+    const landTopo = await getJsonWithFallback(
+      '/data/land-110m.json',
+      'https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json'
+    );
+    const countriesTopo = await getJsonWithFallback(
+      '/data/countries-110m.json',
+      'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
+    );
+    worldData = {
+      land: feature(landTopo, landTopo.objects.land),
+      countries: feature(countriesTopo, countriesTopo.objects.countries)
+    };
+  } catch (e) {
+    console.warn('World data failed to load (offline and not yet cached?)', e);
+    worldData = null; // base sphere + graticule still render
+  }
 }
 
 function tickClock() {
