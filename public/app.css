@@ -5,6 +5,7 @@
   --panel: #1b1b1b;
   --accent: #4aa3ff;
   --border: #2a2a2a;
+  --palette-width: 280px;
 }
 
 body.theme-light {
@@ -47,7 +48,7 @@ body, html {
 
 .container {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: var(--palette-width) 6px 1fr;
   height: calc(100vh - 120px);
 }
 
@@ -56,6 +57,13 @@ body, html {
   background: var(--panel);
   overflow: auto;
 }
+
+/* Resizer between palette and workspace */
+.resizer {
+  background: var(--border);
+  cursor: col-resize;
+}
+.resizer:hover { background: color-mix(in oklab, var(--border), var(--fg) 20%); }
 
 .palette h3 { margin: 8px 12px; font-size: 14px; color: var(--muted); }
 

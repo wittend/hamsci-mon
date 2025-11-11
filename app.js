@@ -11,14 +11,50 @@ const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 const canvas = /** @type {HTMLCanvasElement} */ ($('#globe'));
 const overlay = /** @type {SVGSVGElement} */ ($('#overlay'));
+const workspace = /** @type {HTMLElement} */ (document.querySelector('.workspace'));
 const ctx = canvas.getContext('2d');
-const width = canvas.width;
-const height = canvas.height;
+let width = 1;
+let height = 1;
 
-// Projection and path
-const projection = d3.geoOrthographic().translate([width/2, height/2]).scale(Math.min(width, height) * 0.45).clipAngle(90);
+// Projection and path (configured in resize())
+const projection = d3.geoOrthographic().clipAngle(90);
 const geoPath = d3.geoPath(projection, ctx);
 const graticule = d3.geoGraticule10();
+
+// Responsive sizing
+function resize() {
+  const rect = workspace.getBoundingClientRect();
+  width = Math.max(100, Math.floor(rect.width));
+  height = Math.max(100, Math.floor(rect.height));
+
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  // Set the canvas backing store size and CSS size
+  canvas.width = Math.floor(width * dpr);
+  canvas.height = Math.floor(height * dpr);
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  // Scale drawing so coordinates are in CSS pixels
+  if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  // SVG overlay to match canvas CSS pixels
+  overlay.setAttribute('width', String(width));
+  overlay.setAttribute('height', String(height));
+  overlay.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+  // Update projection for new size
+  projection.translate([width / 2, height / 2]);
+  projection.scale(Math.min(width, height) * 0.48);
+}
+
+const ro = new ResizeObserver(() => {
+  resize();
+  draw();
+});
+if (workspace) ro.observe(workspace);
+window.addEventListener('resize', () => {
+  resize();
+  draw();
+});
 
 let worldData = null; // GeoJSON for land, countries
 let objects = []; // placed objects on globe
@@ -38,14 +74,18 @@ import { fmt2, formatLocalTime, formatUTC } from '/utils/time.js';
 function setTheme(isDark) {
   dark = isDark;
   document.body.classList.toggle('theme-light', !isDark);
+  try { localStorage.setItem('hsm.theme', isDark ? 'dark' : 'light'); } catch(_) {}
   draw();
 }
 
 const themeToggle = /** @type {HTMLInputElement} */($('#theme-toggle'));
 if (themeToggle) {
-  // Default to dark on first load
-  themeToggle.checked = true;
-  setTheme(true);
+  // Load saved theme preference (default dark if none)
+  let saved = 'dark';
+  try { saved = localStorage.getItem('hsm.theme') || 'dark'; } catch(_) {}
+  const isDark = saved !== 'light';
+  themeToggle.checked = isDark;
+  setTheme(isDark);
   themeToggle.addEventListener('change', (e) => setTheme((e.target).checked));
 }
 
@@ -57,6 +97,55 @@ $('#btn-new').addEventListener('click', () => newProject());
 $('#btn-open').addEventListener('click', () => openProject());
 $('#btn-save').addEventListener('click', () => saveProject());
 $('#btn-saveas').addEventListener('click', () => saveProject({ saveAs: true }));
+const fitBtn = $('#btn-fit');
+if (fitBtn) fitBtn.addEventListener('click', () => {
+  // Reset rotation and fit scale to current viewport
+  projection.rotate([0, 0, 0]);
+  projection.scale(Math.min(width, height) * 0.48);
+  draw();
+});
+
+// Palette resizer
+(function setupPaletteResizer(){
+  const resizer = document.getElementById('palette-resizer');
+  if (!resizer) return;
+  let active = false;
+  let startX = 0;
+  let startW = 0;
+  const root = document.documentElement;
+  function getCurrentWidth(){
+    const v = getComputedStyle(root).getPropertyValue('--palette-width').trim();
+    const n = parseInt(v.replace('px','').trim() || '0', 10);
+    return isNaN(n) ? 280 : n;
+  }
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+  function onMove(e){
+    if (!active) return;
+    const dx = e.clientX - startX;
+    const next = clamp(startW + dx, 180, 600);
+    root.style.setProperty('--palette-width', next + 'px');
+    // ResizeObserver on workspace will trigger redraw
+    e.preventDefault();
+  }
+  function onUp(){
+    if (!active) return;
+    active = false;
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('mouseup', onUp);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }
+  resizer.addEventListener('mousedown', (e) => {
+    active = true;
+    startX = e.clientX;
+    startW = getCurrentWidth();
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+})();
 
 async function openProject() {
   // Try server API to list projects
@@ -433,6 +522,8 @@ function tickClock() {
 }
 
 (async function init() {
+  // Size canvas/SVG to fill workspace before any drawing
+  resize();
   await loadWorld();
   await loadPalette();
   draw();

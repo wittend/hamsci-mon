@@ -19,6 +19,7 @@
     <button id="btn-open">Open</button>
     <button id="btn-save">Save</button>
     <button id="btn-saveas">Save As</button>
+    <button id="btn-fit" title="Fit to window">Fit</button>
     <div class="spacer"></div>
     <label class="theme-toggle">
       <input type="checkbox" id="theme-toggle"> Dark Mode
@@ -29,9 +30,10 @@
       <h3>Palette</h3>
       <div id="palette-list"></div>
     </aside>
+    <div class="resizer" id="palette-resizer" aria-hidden="true"></div>
     <main class="workspace">
-      <canvas id="globe" width="900" height="600"></canvas>
-      <svg id="overlay" class="overlay" width="900" height="600"></svg>
+      <canvas id="globe"></canvas>
+      <svg id="overlay" class="overlay"></svg>
       <div id="tooltip" class="tooltip" hidden></div>
     </main>
   </div>
