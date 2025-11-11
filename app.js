@@ -69,12 +69,14 @@ const statusLocal = $('#status-local');
 const statusUTC = $('#status-utc');
 const tooltip = $('#tooltip');
 
-import { fmt2, formatLocalTime, formatUTC } from '/utils/time.js';
+import { formatLocalTime, formatUTC } from '/utils/time.js';
 
 function setTheme(isDark) {
   dark = isDark;
   document.body.classList.toggle('theme-light', !isDark);
-  try { localStorage.setItem('hsm.theme', isDark ? 'dark' : 'light'); } catch(_) {}
+  try {
+    localStorage.setItem('hsm.theme', isDark ? 'dark' : 'light');
+  } catch (_) {}
   draw();
 }
 
@@ -156,7 +158,7 @@ async function openProject() {
     const text = await api(`/api/projects/${encodeURIComponent(choice)}`);
     const data = typeof text === 'string' ? JSON.parse(text) : text;
     loadProjectData(data, choice);
-    return;
+    
   } catch (e) {
     console.warn('Server open failed; falling back to file picker.', e);
     // Fallback: file input
@@ -222,7 +224,7 @@ async function saveProject({ saveAs = false } = {}) {
     console.log('Saved', result);
     currentProjectName = name;
     alert(`Saved ${name}`);
-    return;
+    
   } catch (e) {
     console.warn('Server save failed (likely on Deploy). Falling back to download.', e);
     // Fallback: client-side download

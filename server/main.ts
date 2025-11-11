@@ -7,10 +7,14 @@
  *   (disabled automatically on Deno Deploy)
  */
 
-import { extname, join, basename, normalize } from "https://deno.land/std@0.224.0/path/mod.ts";
-import { contentType } from "https://deno.land/std@0.224.0/media_types/mod.ts";
+import {
+  basename,
+  extname,
+  join,
+} from 'https://deno.land/std@0.224.0/path/mod.ts';
+import { contentType } from 'https://deno.land/std@0.224.0/media_types/mod.ts';
 
-const isDeploy = !!Deno.env.get("DENO_DEPLOYMENT_ID");
+const isDeploy = !!Deno.env.get('DENO_DEPLOYMENT_ID');
 const root = new URL("../", import.meta.url);
 const PUBLIC_DIR = join(root.pathname, "public");
 const PROJECTS_DIR = join(root.pathname, "projects");
@@ -65,31 +69,43 @@ async function serveStatic(url: URL): Promise<Response> {
 
   // SPA fallback (also handles "/" and directory paths)
   try {
-    const index = await Deno.open(join(root.pathname, "index.html"), { read: true });
-    return new Response(index.readable, { headers: { "content-type": "text/html; charset=utf-8" } });
+    const index = await Deno.open(join(root.pathname, "index.html"), {
+      read: true,
+    });
+    return new Response(index.readable, {
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
   } catch (e) {
     return new Response(`index.html missing: ${e}`, { status: 500 });
   }
 }
 
 function ensurePrjName(name: string) {
-  if (!/^[-\w]+_prj\.json$/.test(name)) throw new Error("Invalid project file name");
+  if (!/^[-\w]+_prj\.json$/.test(name)) {
+    throw new Error("Invalid project file name");
+  }
   return name;
 }
 
 async function handleApi(req: Request, url: URL): Promise<Response> {
-  if (url.pathname === "/api/health") return json({ ok: true, deploy: isDeploy });
+  if (url.pathname === "/api/health") {
+    return json({ ok: true, deploy: isDeploy });
+  }
 
   // Disable write endpoints on Deploy
   const method = req.method.toUpperCase();
   const writeBlocked = isDeploy && ["POST", "PUT", "DELETE"].includes(method);
-  if (writeBlocked) return json({ error: "Writes disabled on Deploy" }, { status: 403 });
+  if (writeBlocked) {
+    return json({ error: "Writes disabled on Deploy" }, { status: 403 });
+  }
 
   // Projects
   if (url.pathname === "/api/projects" && method === "GET") {
     const list: string[] = [];
     for await (const entry of Deno.readDir(PROJECTS_DIR)) {
-      if (entry.isFile && entry.name.endsWith("_prj.json")) list.push(entry.name);
+      if (entry.isFile && entry.name.endsWith("_prj.json")) {
+        list.push(entry.name);
+      }
     }
     list.sort();
     return json({ files: list });
@@ -108,14 +124,18 @@ async function handleApi(req: Request, url: URL): Promise<Response> {
     const name = ensurePrjName(basename(url.pathname));
     const path = join(PROJECTS_DIR, name);
     const text = await Deno.readTextFile(path);
-    return new Response(text, { headers: { "content-type": "application/json; charset=utf-8" } });
+    return new Response(text, {
+      headers: { "content-type": "application/json; charset=utf-8" },
+    });
   }
 
   // Object definitions listing (read-only ok on Deploy)
   if (url.pathname === "/api/objects" && method === "GET") {
     const list: string[] = [];
     for await (const entry of Deno.readDir(OBJ_DIR)) {
-      if (entry.isFile && entry.name.endsWith("_obj.json")) list.push(entry.name);
+      if (entry.isFile && entry.name.endsWith("_obj.json")) {
+        list.push(entry.name);
+      }
     }
     list.sort();
     return json({ files: list });
@@ -126,13 +146,17 @@ async function handleApi(req: Request, url: URL): Promise<Response> {
     if (!name.endsWith("_obj.json")) return notFound();
     const path = join(OBJ_DIR, name);
     const text = await Deno.readTextFile(path);
-    return new Response(text, { headers: { "content-type": "application/json; charset=utf-8" } });
+    return new Response(text, {
+      headers: { "content-type": "application/json; charset=utf-8" },
+    });
   }
 
   if (url.pathname === "/api/objects" && method === "POST") {
     const body = await req.json();
     const name: string = String(body?.name ?? "");
-    if (!/^[-\w]+_obj\.json$/.test(name)) throw new Error("Invalid object file name");
+    if (!/^[-\w]+_obj\.json$/.test(name)) {
+      throw new Error("Invalid object file name");
+    }
     const path = join(OBJ_DIR, name);
     await Deno.writeTextFile(path, JSON.stringify(body?.data ?? {}, null, 2));
     return json({ saved: basename(path) });

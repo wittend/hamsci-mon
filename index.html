@@ -1,20 +1,20 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hamsci-mon</title>
-  <link rel="icon" href="/javascript.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/app.css">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>hamsci-mon</title>
+    <link rel="icon" href="/javascript.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/app.css">
 </head>
 <body>
-  <div id="menubar" class="menubar">
+<div id="menubar" class="menubar">
     <div class="menu-item" data-menu="file">File</div>
     <div class="menu-item" data-menu="edit">Edit</div>
     <div class="menu-item" data-menu="tools">Tools</div>
     <div class="menu-item" data-menu="help">Help</div>
-  </div>
-  <div id="toolbar" class="toolbar">
+</div>
+<div id="toolbar" class="toolbar">
     <button id="btn-new">New</button>
     <button id="btn-open">Open</button>
     <button id="btn-save">Save</button>
@@ -22,32 +22,32 @@
     <button id="btn-fit" title="Fit to window">Fit</button>
     <div class="spacer"></div>
     <label class="theme-toggle">
-      <input type="checkbox" id="theme-toggle"> Dark Mode
+        <input type="checkbox" id="theme-toggle"> Dark Mode
     </label>
-  </div>
-  <div class="container">
+</div>
+<div class="container">
     <aside class="palette" id="palette">
-      <h3>Palette</h3>
-      <div id="palette-list"></div>
+        <h3>Palette</h3>
+        <div id="palette-list"></div>
     </aside>
     <div class="resizer" id="palette-resizer" aria-hidden="true"></div>
     <main class="workspace">
-      <canvas id="globe"></canvas>
-      <svg id="overlay" class="overlay"></svg>
-      <div id="tooltip" class="tooltip" hidden></div>
+        <canvas id="globe"></canvas>
+        <svg id="overlay" class="overlay"></svg>
+        <div id="tooltip" class="tooltip" hidden></div>
     </main>
-  </div>
-  <div id="statusbar" class="statusbar">
+</div>
+<div id="statusbar" class="statusbar">
     <div>Lat: <span id="status-lat">—</span></div>
     <div>Lon: <span id="status-lon">—</span></div>
     <div>Local: <span id="status-local">—</span></div>
     <div class="spacer"></div>
     <div>UTC @ cursor: <span id="status-utc">—</span></div>
-  </div>
-  <!-- Offline vendor libraries (UMD globals) -->
-  <script src="/vendor/d3.v7.min.js"></script>
-  <script src="/vendor/topojson-client.min.js"></script>
-  <!-- App entry (uses window.d3 and window.topojson) -->
-  <script type="module" src="/app.js"></script>
+</div>
+<!-- Offline vendor libraries (UMD globals) -->
+<script src="/vendor/d3.v7.min.js"></script>
+<script src="/vendor/topojson-client.min.js"></script>
+<!-- App entry (uses window.d3 and window.topojson) -->
+<script type="module" src="/app.js"></script>
 </body>
 </html>
