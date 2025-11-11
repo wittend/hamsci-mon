@@ -1,8 +1,10 @@
 // hamsci-mon client app
 // GPL-3.0-or-later
 
-import * as d3 from "/vendor/d3.esm.js";
-import { feature } from "/vendor/topojson-client.esm.js";
+// Using UMD globals (loaded by script tags in index.html) for full offline support
+// d3 available as window.d3; topojson.feature available as window.topojson.feature
+const d3 = window.d3;
+const feature = window.topojson.feature;
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
