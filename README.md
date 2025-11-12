@@ -2,6 +2,10 @@
 
 A Deno-based, offline-capable, browser application that renders an interactive globe (D3 + TopoJSON) with a draggable palette for placing objects and drawing connectors. It ships with a minimal development server and optional persistence endpoints for local projects. The UI supports dark/light themes, fits the window responsively, and works fully offline (vendored JS + map data).
 
+<p align="center">
+  <img src="docs/Screenshot from 2025-11-12 10-36-38.png" alt="flow-dash sample" width="600" />
+</p>
+
 SPDX-License-Identifier: GPL-3.0-or-later
 
 ## Features
